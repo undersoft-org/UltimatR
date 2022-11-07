@@ -1,0 +1,94 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\dariusz.hanc\.nuget\packages\nlog.config\4.7.10\contentFiles\any\any\NLog.config" />
+    <None Remove="nlog.config" />
+    <None Remove="nlog.Development.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Properties\nlog.Development.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
+    <PackageReference Include="NLog" Version="4.7.12" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.7.4" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+	  <PackageReference Include="AutoMapper" Version="10.1.1" />
+	  <PackageReference Include="FluentValidation" Version="10.3.4" />
+	  <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
+	  <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+	  <PackageReference Include="MediatR" Version="9.0.0" />
+	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+	  <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.13">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.13">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.13" />
+	  <PackageReference Include="Microsoft.Identity.Web" Version="1.19.0" />
+	  <PackageReference Include="Microsoft.OData.Client" Version="7.9.0" />
+	  <PackageReference Include="Microsoft.OData.Core" Version="7.9.0" />
+	  <PackageReference Include="Microsoft.OData.Edm" Version="7.9.0" />
+	  <PackageReference Include="MongoDB.EntityFramework" Version="1.0.1" />
+	  <PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
+	  <PackageReference Include="Oracle.EntityFrameworkCore" Version="5.21.4" />
+	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.2" />
+	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+	  <PackageReference Include="System.Net.WebSockets.WebSocketProtocol" Version="5.0.0" />
+  </ItemGroup>
+
+
+</Project>
