@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using AutoMapper.Configuration;
+using AutoMapper.Internal;
 
 namespace UltimatR
 {
