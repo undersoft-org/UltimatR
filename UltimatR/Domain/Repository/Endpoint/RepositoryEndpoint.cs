@@ -187,7 +187,7 @@ namespace UltimatR
             => Context.Database.ExecuteSqlRaw(sql, parameters);
 
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) 
-        where TEntity : class => ((DbContext)InnerContext).Set<TEntity>().FromSqlRaw(sql, parameters);       
+        where TEntity : class => (Microsoft.EntityFrameworkCore.RelationalQueryableExtensions.FromSqlRaw(((DbContext)InnerContext).Set<TEntity>(), sql, parameters));       
 
         public override ulong UniqueKey
         {
