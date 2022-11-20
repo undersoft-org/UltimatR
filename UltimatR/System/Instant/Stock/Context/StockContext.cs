@@ -6,7 +6,7 @@ namespace System.Instant.Stock
     using IO;
     using Runtime.InteropServices;
 
-    public sealed unsafe class StockContext : IStockContext, IDisposable
+    public unsafe class StockContext : IStockContext, IDisposable
     {
         public IntPtr binReceivePtr;
         public IntPtr binSendPtr;

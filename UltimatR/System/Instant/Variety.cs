@@ -671,7 +671,8 @@ namespace System.Instant
                 Rubrics["EntityOriginId"],
                 Rubrics["EntityFlags"],
                 Rubrics["SystemTime"],
-                Rubrics["SerialCode"]
+                Rubrics["SerialCode"],
+                Rubrics["sleeve"]
             });
         }
 

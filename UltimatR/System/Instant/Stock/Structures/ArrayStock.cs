@@ -7,7 +7,7 @@
     using Runtime.InteropServices;
     using Security.Permissions;
 
-    public class ArrayStock<T> : ArrayStock
+    public class ArrayStock<T> : ArrayStock, IStock<T> where T : struct
     {
         public ArrayStock() : this(new StockOptions()) { }
 

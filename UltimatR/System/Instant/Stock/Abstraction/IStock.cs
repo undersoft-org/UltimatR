@@ -8,6 +8,12 @@ using System.Threading;
 
 namespace System.Instant.Stock
 {
+    public interface IStock<T> : IStock
+    {
+
+    }
+
+
     public interface IStock : IUnique
     {
         object this[int index] { get; set; }

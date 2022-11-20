@@ -16,7 +16,7 @@ namespace System.Series.Tests
     using System.Diagnostics;
     using System.Linq;
     using System.Series;
-
+    using System.Threading;
     using Xunit;
 
     /// <summary>
@@ -253,6 +253,8 @@ namespace System.Series.Tests
                 string r = registry.Get(item.Key);
                 if (r != null)
                     items.Add(r);
+                else
+                    Thread.Sleep(1000);
             }
             Assert.Equal(100000, items.Count);
         }

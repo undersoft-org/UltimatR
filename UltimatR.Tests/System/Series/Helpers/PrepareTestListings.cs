@@ -84,9 +84,7 @@ namespace System.Series.Tests
             for (int i = 0; i < 250000; i++)
             {
                 long date = DateTime.Now.ToBinary();
-                list.Add(new KeyValuePair<object, string>((i + 1000000000).ToString() + now + new Usid(date).ToString(), i.ToString() + "_" + now));
-                list.Add(new KeyValuePair<object, string>((i + 1000000000).ToString() + now + new Usid(date).ToString(), i.ToString() + "_" + now));
-                list.Add(new KeyValuePair<object, string>((i + 1000000000).ToString() + now + new Usid(date).ToString(), i.ToString() + "_" + now));                
+                list.Add(new KeyValuePair<object, string>((i + 1000000000).ToString() + now + new Usid(date).ToString(), i.ToString() + "_" + now));              
             }
             List<object> keys = new List<object>();
             now = "_prepareObjectKeyTestCollection";

@@ -16,7 +16,7 @@ namespace System.Series.Basedeck
         private const float REMOVED_PERCENT_LIMIT = 0.15F;
 
         protected Ussn serialcode;
-        protected ICard<V> first, last;
+        protected ICard<V> first, last; 
         protected ICard<V>[] table;
         protected readonly int minSize;
         protected int count, conflicts, removed, size, mincount;
@@ -24,7 +24,6 @@ namespace System.Series.Basedeck
 
         private int nextSize()
         {
-            
             return (((int)(size * RESIZING_VECTOR)) | 3); 
         }
 
@@ -75,20 +74,24 @@ namespace System.Series.Basedeck
         }
         protected KeyedSet(IList<ICard<V>> collection, int capacity = 17, HashBits bits = HashBits.bit64) : this(capacity > collection.Count ? capacity : collection.Count, bits)
         {
-            this.Add(collection);
+            if (collection != null)
+                this.Add(collection);
         }
         protected KeyedSet(IList<IUnique<V>> collection, int capacity = 17, HashBits bits = HashBits.bit64) : this(capacity > collection.Count ? capacity : collection.Count, bits)
         {
-            foreach (var c in collection)
+            if (collection != null)
+                foreach (var c in collection)
                 this.Add(c);
         }
         protected KeyedSet(IEnumerable<ICard<V>> collection, int capacity = 17, HashBits bits = HashBits.bit64) : this(capacity, bits)
         {
-            this.Add(collection);
+            if (collection != null)
+                this.Add(collection);                        
         }
         protected KeyedSet(IEnumerable<IUnique<V>> collection, int capacity = 17, HashBits bits = HashBits.bit64) : this(capacity, bits)
         {
-            foreach (var c in collection)
+            if (collection != null)
+                foreach (var c in collection)
                 this.Add(c);
         }
 
@@ -137,10 +140,7 @@ namespace System.Series.Basedeck
         }
 
         protected virtual V InnerGet(ulong key)
-        {
-            if (key == 0)
-                return default(V);
-
+        {          
             ICard<V> mem = table[getPosition(key)];
 
             while (mem != null)
@@ -251,9 +251,6 @@ namespace System.Series.Basedeck
 
         protected virtual ICard<V> InnerGetCard(ulong key)
         {
-            if (key == 0)
-                return null;
-
             ICard<V> mem = table[getPosition(key)];
 
             while (mem != null)
@@ -479,9 +476,9 @@ namespace System.Series.Basedeck
             }
         }
 
-        protected abstract bool InnerAdd(ulong key, V value);
-        protected abstract bool InnerAdd(V value);
-        protected abstract bool InnerAdd(ICard<V> value);
+        internal abstract bool InnerAdd(ulong key, V value);
+        internal abstract bool InnerAdd(V value);
+        internal abstract bool InnerAdd(ICard<V> value);
         public virtual bool Add(ulong key, object value)
         {
             return InnerAdd(key, (V)value);
@@ -1044,7 +1041,7 @@ namespace System.Series.Basedeck
         protected virtual int IndexOf(ulong key, V item)
         {
             var card = GetCard(key);
-            if (ValueEquals(card.Value, item))
+            if (card != null && ValueEquals(card.Value, item))
                 return card.Index;
             return -1;
         }
@@ -1079,28 +1076,13 @@ namespace System.Series.Basedeck
         }
 
         protected ulong getPosition(ulong key)
-        {
-            
+        {            
 
-            return (key % maxId);
-
-            
-            
-            
-
-            
+            return (key % maxId);          
         }
         protected static ulong getPosition(ulong key, uint tableMaxId)
-        {
-            
-
+        {            
             return (key % tableMaxId);
-
-            
-            
-            
-
-            
         }
 
         protected virtual void Rehash(int newSize)

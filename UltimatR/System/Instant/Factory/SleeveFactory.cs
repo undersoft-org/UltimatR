@@ -1,6 +1,7 @@
 ﻿namespace System.Instant
 {
     using Series;
+    using UltimatR;
     using Uniques;
 
     public static class SleeveFactory
@@ -98,6 +99,8 @@
             var t = item.GetType();
             if (t.IsAssignableTo(typeof(ISleeve)))
                 return (ISleeve)item;
+            else if (t.IsAssignableTo(typeof(IEntity)))
+                return ((IEntity)item).Valuator;
 
             var key = t.UniqueKey32();
             if (!Cache.TryGet(key, out Sleeve sleeve))
@@ -110,6 +113,8 @@
             var t = typeof(T);
             if (t.IsAssignableTo(typeof(ISleeve)))
                 return (ISleeve)item;
+            else if (t.IsAssignableTo(typeof(IEntity)))
+                return ((IEntity)item).Valuator;
 
             var key = t.UniqueKey32();
             if(!Cache.TryGet(key, out Sleeve sleeve))

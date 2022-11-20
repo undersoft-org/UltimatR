@@ -1,18 +1,17 @@
-﻿
+﻿using System.Logs;
+using System.Threading;
+using System.Collections.Generic;
+
 namespace System.Series
 {
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Logs;
-
     public class MassCache<V> : MassCatalogBase<V> where V : IUnique
     {
         private readonly Board<Timer> timers = new Board<Timer>();
 
         private TimeSpan duration;
-        private Deputy callback;
+        private IDeputy callback;
 
-        private void setupExpiration(TimeSpan? lifetime, Deputy callback)
+        private void setupExpiration(TimeSpan? lifetime, IDeputy callback)
         {
             duration =  (lifetime != null) ? lifetime.Value : TimeSpan.FromMinutes(15);
             if (callback != null) this.callback = callback;
@@ -20,23 +19,23 @@ namespace System.Series
 
         #region Constructors
 
-        public MassCache(IEnumerable<IUnique<V>> collection, TimeSpan? lifeTime = null, Deputy callback = null, int capacity = 17) : base(collection, capacity)
+        public MassCache(IEnumerable<IUnique<V>> collection, TimeSpan? lifeTime = null, IDeputy callback = null, int capacity = 17) : base(collection, capacity)
         {
             setupExpiration(lifeTime, callback);
         }
-        public MassCache(IEnumerable<V> collection, TimeSpan? lifeTime = null, Deputy callback = null, int capacity = 17) : base(collection, capacity)
+        public MassCache(IEnumerable<V> collection, TimeSpan? lifeTime = null, IDeputy callback = null, int capacity = 17) : base(collection, capacity)
         {
             setupExpiration(lifeTime, callback);
         }
-        public MassCache(IList<IUnique<V>> collection, TimeSpan? lifeTime = null, Deputy callback = null, int capacity = 17) : base(collection, capacity)
+        public MassCache(IList<IUnique<V>> collection, TimeSpan? lifeTime = null, IDeputy callback = null, int capacity = 17) : base(collection, capacity)
         {
             setupExpiration(lifeTime, callback);
         }
-        public MassCache(IList<V> collection, TimeSpan? lifeTime = null, Deputy callback = null, int capacity = 17) : base(collection, capacity)
+        public MassCache(IList<V> collection, TimeSpan? lifeTime = null, IDeputy callback = null, int capacity = 17) : base(collection, capacity)
         {
             setupExpiration(lifeTime, callback);
         }
-        public MassCache(TimeSpan? lifeTime = null, Deputy callback = null, int capacity = 17) : base(capacity)
+        public MassCache(TimeSpan? lifeTime = null, IDeputy callback = null, int capacity = 17) : base(capacity)
         {
             setupExpiration(lifeTime, callback);
         }

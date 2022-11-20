@@ -27,11 +27,11 @@ using System.Diagnostics;
         /// <summary>
         /// The input
         /// </summary>
-        private readonly Catalog<object> input = new Catalog<object>();
+        private readonly Catalog<object> input = new Catalog<object>(true);
         /// <summary>
         /// The output
         /// </summary>
-        private readonly Catalog<object> output = new Catalog<object>();
+        private readonly Catalog<object> output = new Catalog<object>(true);
         /// <summary>
         /// The serial code
         /// </summary>

@@ -190,7 +190,7 @@ namespace System.Instant
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
-        protected override bool InnerAdd(IFigure value)
+        internal override bool InnerAdd(IFigure value)
         {
             return InnerAdd(NewCard(value));
         }

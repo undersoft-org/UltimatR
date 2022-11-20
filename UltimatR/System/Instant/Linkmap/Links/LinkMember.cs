@@ -46,7 +46,7 @@ namespace System.Instant.Linking
         /// <param name="sleeve">The sleeve.</param>
         /// <param name="link">The link.</param>
         /// <param name="site">The site.</param>
-        public LinkMember(Sleeve sleeve, Link link, LinkSite site) : this()
+        public LinkMember(ISleeve sleeve, Link link, LinkSite site) : this()
         {
             string[] names = link.Name.Split("To");
             LinkMember member;
@@ -112,7 +112,7 @@ namespace System.Instant.Linking
         /// Gets or sets the sleeve.
         /// </summary>
         /// <value>The sleeve.</value>
-        public Sleeve Sleeve { get; set; }
+        public ISleeve Sleeve { get; set; }
 
         /// <summary>
         /// Gets or sets the key rubrics.
@@ -257,7 +257,7 @@ namespace System.Instant.Linking
         /// </summary>
         /// <param name="sleeve">The sleeve.</param>
         /// <param name="link">The link.</param>
-        public LinkNode(Sleeve sleeve, Link link) : this()
+        public LinkNode(ISleeve sleeve, Link link) : this()
         {
             Name = link.Name;
             LinkNode member;
@@ -287,7 +287,7 @@ namespace System.Instant.Linking
         /// Gets or sets the sleeve.
         /// </summary>
         /// <value>The sleeve.</value>
-        public Sleeve Sleeve { get; set; }
+        public ISleeve Sleeve { get; set; }
 
         /// <summary>
         /// Gets or sets the origin key rubrics.

@@ -1,39 +1,10 @@
 ﻿
-// <copyright file="StreamMarkupExetnsion.cs" company="UltimatR.Core">
-//     Copyright (c) Undersoft. All rights reserved.
-// </copyright>
-
-
-
-/// <summary>
-/// The IO namespace.
-/// </summary>
 namespace System.IO
 {
 
-
-
-    /// <summary>
-    /// Class StreamMarkupExtension.
-    /// </summary>
     public static class StreamMarkupExtension
     {
-        #region Methods
 
-
-
-
-
-
-
-
-        /// <summary>
-        /// Markups the specified blocksize.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="blocksize">The blocksize.</param>
-        /// <param name="bytenoise">The bytenoise.</param>
-        /// <returns>Stream.</returns>
         public static Stream Markup(this Stream stream, int blocksize, MarkupType bytenoise)
         {
             int blockSize = blocksize;
@@ -44,20 +15,6 @@ namespace System.IO
             return stream;
         }
 
-
-
-
-
-
-
-
-        /// <summary>
-        /// Markups the specified blocksize.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="blocksize">The blocksize.</param>
-        /// <param name="bytenoise">The bytenoise.</param>
-        /// <returns>Stream.</returns>
         public static Stream Markup(this Stream stream, long blocksize, MarkupType bytenoise)
         {
             long blockSize = blocksize;
@@ -68,24 +25,6 @@ namespace System.IO
             return stream;
         }
 
-
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// Seeks the markup.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="seekorigin">The seekorigin.</param>
-        /// <param name="direction">The direction.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="_length">The length.</param>
-        /// <returns>MarkupType.</returns>
         public static MarkupType SeekMarkup(this Stream stream, SeekOrigin seekorigin = SeekOrigin.Begin, SeekDirection direction = SeekDirection.Forward, int offset = 0, int _length = -1)
         {
             bool isFwd = (direction != SeekDirection.Forward) ? false : true;
@@ -130,6 +69,5 @@ namespace System.IO
             return lastKind;
         }
 
-        #endregion
     }
 }

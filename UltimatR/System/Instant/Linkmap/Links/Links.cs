@@ -3,8 +3,6 @@
 //     Copyright (c) Undersoft. All rights reserved.
 // </copyright>
 
-
-
 /// <summary>
 /// The Linking namespace.
 /// </summary>
@@ -221,7 +219,7 @@ namespace System.Instant.Linking
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
-        protected override bool InnerAdd(Link value)
+        internal override bool InnerAdd(Link value)
         {
             return InnerAdd(NewCard(value));
         }

@@ -1,19 +1,14 @@
-﻿
-// <copyright file="SleeveCompilerBase.cs" company="UltimatR.Core">
+﻿//-----------------------------------------------------------------------
+// <copyright file="SleeveCompilerBase.cs" company="Undersoft">
+//     Author: Dariusz Hanc
 //     Copyright (c) Undersoft. All rights reserved.
 // </copyright>
-
-
-
+//-----------------------------------------------------------------------
 using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// The Instant namespace.
-/// </summary>
 namespace System.Instant
 {
     using System.Collections.Generic;
-    using System.Instant.Treatments;
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
@@ -22,32 +17,11 @@ namespace System.Instant
     using System.Uniques;
 
     /// <summary>
-    /// Class SleeveCompilerBase.
-    /// Implements the <see cref="System.Instant.CompilerConstructors" />
+    /// Class SleeveCompilerBase. Implements the <see cref="System.Instant.CompilerConstructors"/>
     /// </summary>
-    /// <seealso cref="System.Instant.CompilerConstructors" />
+    /// <seealso cref="System.Instant.CompilerConstructors"/>
     public abstract class SleeveCompilerBase : CompilerConstructors
     {
-        #region Fields
-
-
-
-
-
-
-
-        /// <summary>
-        /// The rubric builders
-        /// </summary>
-        public IDeck<RubricBuilder> rubricBuilders;
-        /// <summary>
-        /// The identities
-        /// </summary>
-        public SortedList<short, MemberRubric> Identities = new SortedList<short, MemberRubric>();
-        /// <summary>
-        /// The sleeve
-        /// </summary>
-        protected Sleeve sleeve;
         /// <summary>
         /// The length
         /// </summary>
@@ -60,31 +34,194 @@ namespace System.Instant
         /// The scode
         /// </summary>
         protected int scode = 1;
+        /// <summary>
+        /// The sleeve
+        /// </summary>
+        protected Sleeve sleeve;
+        /// <summary>
+        /// The identities
+        /// </summary>
+        public SortedList<short, MemberRubric> Identities = new SortedList<short, MemberRubric>();
 
-        #endregion
-
-        #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SleeveCompilerBase" /> class.
+        /// The rubric builders
+        /// </summary>
+        public IDeck<RubricBuilder> rubricBuilders;
+
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SleeveCompilerBase"/> class.
         /// </summary>
         /// <param name="instantSleeve">The instant sleeve.</param>
         /// <param name="rubricBuilders">The rubric builders.</param>
         public SleeveCompilerBase(Sleeve instantSleeve, IDeck<RubricBuilder> rubricBuilders)
-        {           
+        {
             sleeve = instantSleeve;
             this.rubricBuilders = rubricBuilders;
             length = this.rubricBuilders.Count;
         }
 
-        #endregion
+        /// <summary>
+        /// Resolves the figure display attributes.
+        /// </summary>
+        /// <param name="fb">The fb.</param>
+        /// <param name="mi">The mi.</param>
+        /// <param name="mr">The mr.</param>
+        void resolveFigureDisplayAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
+        {
+            object[] o = mi.GetCustomAttributes(typeof(FigureDisplayAttribute), false);
+            if((o != null) && o.Any())
+            {
+                FigureDisplayAttribute fda = (FigureDisplayAttribute)o.First();
+                ;
+                mr.DisplayName = fda.Name;
 
-        #region Properties
+                if(fb != null)
+                    CreateFigureDisplayAttribute(fb, fda);
+            } else if(mr.DisplayName != null)
+            {
+                CreateFigureDisplayAttribute(fb, new FigureDisplayAttribute(mr.DisplayName));
+            }
+        }
 
+        /// <summary>
+        /// Resolves the figure identity attributes.
+        /// </summary>
+        /// <param name="fb">The fb.</param>
+        /// <param name="mi">The mi.</param>
+        /// <param name="mr">The mr.</param>
+        void resolveFigureIdentityAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
+        {
+            if(!mr.IsKey)
+            {
+                object[] o = mi.GetCustomAttributes(typeof(FigureIdentityAttribute), false);
+                if((o != null) && o.Any())
+                {
+                    FigureIdentityAttribute fia = (FigureIdentityAttribute)o.First();
+                    mr.IsIdentity = true;
+                    mr.IsAutoincrement = fia.IsAutoincrement;
 
-        #endregion
+                    if(Identities.ContainsKey(fia.Order))
+                        fia.Order = (short)(Identities.LastOrDefault().Key + 1);
 
-        #region Methods
+                    mr.IdentityOrder = fia.Order;
+                    Identities.Add(mr.IdentityOrder, mr);
+
+                    if(fb != null)
+                        CreateFigureIdentityAttribute(fb, fia);
+                } else if(mr.IsIdentity)
+                {
+                    if(Identities.ContainsKey(mr.IdentityOrder))
+                        mr.IdentityOrder += (short)(Identities.LastOrDefault().Key + 1);
+
+                    Identities.Add(mr.IdentityOrder, mr);
+
+                    if(fb != null)
+                        CreateFigureIdentityAttribute(
+                            fb,
+                            new FigureIdentityAttribute
+                            {
+                                IsAutoincrement = mr.IsAutoincrement,
+                                Order = mr.IdentityOrder
+                            });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Resolves the figure key attributes.
+        /// </summary>
+        /// <param name="fb">The fb.</param>
+        /// <param name="mi">The mi.</param>
+        /// <param name="mr">The mr.</param>
+        void resolveFigureKeyAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
+        {
+            object[] o = mi.GetCustomAttributes(typeof(KeyAttribute), false);
+            if((o == null) || !o.Any())
+                o = mi.GetCustomAttributes(typeof(FigureKeyAttribute), false);
+            else
+                o[0] = new FigureKeyAttribute();
+
+            if((o != null) && o.Any())
+            {
+                FigureKeyAttribute fka = (FigureKeyAttribute)o.First();
+                mr.IsKey = true;
+                mr.IsIdentity = true;
+                mr.IsAutoincrement = fka.IsAutoincrement;
+
+                if(Identities.ContainsKey(fka.Order))
+                    fka.Order = (short)(Identities.LastOrDefault().Key + 1);
+
+                mr.IdentityOrder = fka.Order;
+                Identities.Add(mr.IdentityOrder, mr);
+                mr.Required = true;
+
+                if(fb != null)
+                    CreateFigureKeyAttribute(fb, fka);
+            } else if(mr.IsKey)
+            {
+                mr.IsIdentity = true;
+                mr.Required = true;
+
+                if(Identities.ContainsKey(mr.IdentityOrder))
+                    mr.IdentityOrder += (short)(Identities.LastOrDefault().Key + 1);
+
+                Identities.Add(mr.IdentityOrder, mr);
+
+                if(fb != null)
+                    CreateFigureKeyAttribute(
+                        fb,
+                        new FigureKeyAttribute { IsAutoincrement = mr.IsAutoincrement, Order = mr.IdentityOrder });
+            }
+        }
+
+        /// <summary>
+        /// Resolves the figure rquired attributes.
+        /// </summary>
+        /// <param name="fb">The fb.</param>
+        /// <param name="mi">The mi.</param>
+        /// <param name="mr">The mr.</param>
+        void resolveFigureRquiredAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
+        {
+            object[] o = mi.GetCustomAttributes(typeof(FigureRequiredAttribute), false);
+            if((o != null) && o.Any())
+            {
+                mr.Required = true;
+
+                if(fb != null)
+                    CreateFigureRequiredAttribute(fb);
+            } else if(mr.Required)
+            {
+                if(fb != null)
+                    CreateFigureRequiredAttribute(fb);
+            }
+        }
+
+        /// <summary>
+        /// Resolves the figure treatment attributes.
+        /// </summary>
+        /// <param name="fb">The fb.</param>
+        /// <param name="mi">The mi.</param>
+        /// <param name="mr">The mr.</param>
+        void resolveFigureTreatmentAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
+        {
+            object[] o = mi.GetCustomAttributes(typeof(FigureTreatmentAttribute), false);
+            if((o != null) && o.Any())
+            {
+                FigureTreatmentAttribute fta = (FigureTreatmentAttribute)o.First();
+                ;
+
+                mr.SummaryOperand = fta.SummaryOperand;
+
+                if(fb != null)
+                    CreateFigureTreatmentAttribute(fb, fta);
+            } else if(mr.SummaryOperand != SummarizeOperand.None)
+            {
+                CreateFigureTreatmentAttribute(fb, new FigureTreatmentAttribute { SummaryOperand = mr.SummaryOperand });
+            }
+        }
+
 
         /// <summary>
         /// Compiles the type of the sleeve.
@@ -118,9 +255,12 @@ namespace System.Instant
         /// <param name="attrib">The attribute.</param>
         public void CreateFigureAsAttribute(FieldBuilder field, FigureAsAttribute attrib)
         {
-            field.SetCustomAttribute(new CustomAttributeBuilder(marshalAsCtor, new object[] { attrib.Value },
-                                                                               new FieldInfo[] { typeof(MarshalAsAttribute).GetField("SizeConst") },
-                                                                               new object[] { attrib.SizeConst }));
+            field.SetCustomAttribute(
+                new CustomAttributeBuilder(
+                    marshalAsCtor,
+                    new object[] { attrib.Value },
+                    new FieldInfo[] { typeof(MarshalAsAttribute).GetField("SizeConst") },
+                    new object[] { attrib.SizeConst }));
         }
 
         /// <summary>
@@ -129,9 +269,7 @@ namespace System.Instant
         /// <param name="field">The field.</param>
         /// <param name="attrib">The attribute.</param>
         public void CreateFigureDisplayAttribute(FieldBuilder field, FigureDisplayAttribute attrib)
-        {
-            field.SetCustomAttribute(new CustomAttributeBuilder(figureDisplayCtor, new object[] { attrib.Name }));
-        }
+        { field.SetCustomAttribute(new CustomAttributeBuilder(figureDisplayCtor, new object[] { attrib.Name })); }
 
         /// <summary>
         /// Creates the figure identity attribute.
@@ -140,10 +278,16 @@ namespace System.Instant
         /// <param name="attrib">The attribute.</param>
         public void CreateFigureIdentityAttribute(FieldBuilder field, FigureIdentityAttribute attrib)
         {
-            field.SetCustomAttribute(new CustomAttributeBuilder(figureIdentityCtor, Type.EmptyTypes,
-                                                                                    new FieldInfo[] { typeof(FigureIdentityAttribute).GetField("Order"),
-                                                                                                      typeof(FigureIdentityAttribute).GetField("IsAutoincrement") },
-                                                                                    new object[] { attrib.Order, attrib.IsAutoincrement }));
+            field.SetCustomAttribute(
+                new CustomAttributeBuilder(
+                    figureIdentityCtor,
+                    Type.EmptyTypes,
+                    new FieldInfo[]
+                {
+                    typeof(FigureIdentityAttribute).GetField("Order"),
+                    typeof(FigureIdentityAttribute).GetField("IsAutoincrement")
+                },
+                    new object[] { attrib.Order, attrib.IsAutoincrement }));
         }
 
         /// <summary>
@@ -153,10 +297,16 @@ namespace System.Instant
         /// <param name="attrib">The attribute.</param>
         public void CreateFigureKeyAttribute(FieldBuilder field, FigureKeyAttribute attrib)
         {
-            field.SetCustomAttribute(new CustomAttributeBuilder(figureKeyCtor, Type.EmptyTypes,
-                                                                               new FieldInfo[] { typeof(FigureKeyAttribute).GetField("Order"),
-                                                                                                 typeof(FigureKeyAttribute).GetField("IsAutoincrement") },
-                                                                               new object[] { attrib.Order, attrib.IsAutoincrement }));
+            field.SetCustomAttribute(
+                new CustomAttributeBuilder(
+                    figureKeyCtor,
+                    Type.EmptyTypes,
+                    new FieldInfo[]
+                {
+                    typeof(FigureKeyAttribute).GetField("Order"),
+                    typeof(FigureKeyAttribute).GetField("IsAutoincrement")
+                },
+                    new object[] { attrib.Order, attrib.IsAutoincrement }));
         }
 
         /// <summary>
@@ -164,9 +314,7 @@ namespace System.Instant
         /// </summary>
         /// <param name="field">The field.</param>
         public void CreateFigureRequiredAttribute(FieldBuilder field)
-        {
-            field.SetCustomAttribute(new CustomAttributeBuilder(figureRequiredCtor, Type.EmptyTypes));
-        }
+        { field.SetCustomAttribute(new CustomAttributeBuilder(figureRequiredCtor, Type.EmptyTypes)); }
 
         /// <summary>
         /// Creates the figure treatment attribute.
@@ -175,10 +323,16 @@ namespace System.Instant
         /// <param name="attrib">The attribute.</param>
         public void CreateFigureTreatmentAttribute(FieldBuilder field, FigureTreatmentAttribute attrib)
         {
-            field.SetCustomAttribute(new CustomAttributeBuilder(figuresTreatmentCtor, Type.EmptyTypes,
-                                                                                        new FieldInfo[] { typeof(FigureTreatmentAttribute).GetField("AggregateOperand"),
-                                                                                                          typeof(FigureTreatmentAttribute).GetField("SummaryOperand") },
-                                                                                        new object[] { attrib.AggregateOperand, attrib.SummaryOperand }));
+            field.SetCustomAttribute(
+                new CustomAttributeBuilder(
+                    figuresTreatmentCtor,
+                    Type.EmptyTypes,
+                    new FieldInfo[]
+                {
+                    typeof(FigureTreatmentAttribute).GetField("AggregateOperand"),
+                    typeof(FigureTreatmentAttribute).GetField("SummaryOperand")
+                },
+                    new object[] { attrib.SummaryOperand }));
         }
 
         /// <summary>
@@ -193,8 +347,11 @@ namespace System.Instant
         /// <param name="tb">The tb.</param>
         public virtual void CreateGetEmptyProperty(TypeBuilder tb)
         {
-            PropertyBuilder prop = tb.DefineProperty("Empty", PropertyAttributes.HasDefault,
-                                                     typeof(IUnique), Type.EmptyTypes);
+            PropertyBuilder prop = tb.DefineProperty(
+                "Empty",
+                PropertyAttributes.HasDefault,
+                typeof(IUnique),
+                Type.EmptyTypes);
 
             PropertyInfo iprop = typeof(IUnique).GetProperty("Empty");
 
@@ -203,17 +360,21 @@ namespace System.Instant
             ParameterInfo[] args = accessor.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder getter = tb.DefineMethod(accessor.Name, accessor.Attributes & ~MethodAttributes.Abstract,
-                                                          accessor.CallingConvention, accessor.ReturnType, argTypes);
+            MethodBuilder getter = tb.DefineMethod(
+                accessor.Name,
+                accessor.Attributes & (~MethodAttributes.Abstract),
+                accessor.CallingConvention,
+                accessor.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(getter, accessor);
 
             prop.SetGetMethod(getter);
             ILGenerator il = getter.GetILGenerator();
 
-            il.Emit(OpCodes.Ldarg_0); 
-            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField); 
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField);
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetMethod("get_Empty"), null);
-            il.Emit(OpCodes.Ret); 
+            il.Emit(OpCodes.Ret);
         }
 
         /// <summary>
@@ -231,8 +392,12 @@ namespace System.Instant
             ParameterInfo[] args = mi.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(mi.Name, mi.Attributes & ~MethodAttributes.Abstract,
-                                                          mi.CallingConvention, mi.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                mi.Name,
+                mi.Attributes & (~MethodAttributes.Abstract),
+                mi.CallingConvention,
+                mi.ReturnType,
+                argTypes);
 
             tb.DefineMethodOverride(method, mi);
 
@@ -256,8 +421,12 @@ namespace System.Instant
             ParameterInfo[] args = createArray.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(createArray.Name, createArray.Attributes & ~MethodAttributes.Abstract,
-                                                          createArray.CallingConvention, createArray.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                createArray.Name,
+                createArray.Attributes & (~MethodAttributes.Abstract),
+                createArray.CallingConvention,
+                createArray.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(method, createArray);
 
             ILGenerator il = method.GetILGenerator();
@@ -278,8 +447,12 @@ namespace System.Instant
             ParameterInfo[] args = createArray.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(createArray.Name, createArray.Attributes & ~MethodAttributes.Abstract,
-                                                          createArray.CallingConvention, createArray.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                createArray.Name,
+                createArray.Attributes & (~MethodAttributes.Abstract),
+                createArray.CallingConvention,
+                createArray.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(method, createArray);
 
             ILGenerator il = method.GetILGenerator();
@@ -301,8 +474,12 @@ namespace System.Instant
             ParameterInfo[] args = createArray.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(createArray.Name, createArray.Attributes & ~MethodAttributes.Abstract,
-                                                          createArray.CallingConvention, createArray.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                createArray.Name,
+                createArray.Attributes & (~MethodAttributes.Abstract),
+                createArray.CallingConvention,
+                createArray.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(method, createArray);
 
             ILGenerator il = method.GetILGenerator();
@@ -312,6 +489,14 @@ namespace System.Instant
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetMethod("GetUniqueSeed"), null);
             il.Emit(OpCodes.Ret);
         }
+
+        /// <summary>
+        /// Creates the instance property.
+        /// </summary>
+        /// <param name="tb">The tb.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="name">The name.</param>
+        public abstract void CreateInstanceProperty(TypeBuilder tb, Type type, string name);
 
         /// <summary>
         /// Creates the item by int property.
@@ -332,26 +517,13 @@ namespace System.Instant
         /// <param name="attrib">The attribute.</param>
         public void CreateMarshaAslAttribute(FieldBuilder field, MarshalAsAttribute attrib)
         {
-            field.SetCustomAttribute(new CustomAttributeBuilder(marshalAsCtor, new object[] { attrib.Value },
-                                                                               new FieldInfo[] { typeof(MarshalAsAttribute).GetField("SizeConst") },
-                                                                               new object[] { attrib.SizeConst }));
+            field.SetCustomAttribute(
+                new CustomAttributeBuilder(
+                    marshalAsCtor,
+                    new object[] { attrib.Value },
+                    new FieldInfo[] { typeof(MarshalAsAttribute).GetField("SizeConst") },
+                    new object[] { attrib.SizeConst }));
         }
-
-        /// <summary>
-        /// Creates the serial code property.
-        /// </summary>
-        /// <param name="tb">The tb.</param>
-        /// <param name="type">The type.</param>
-        /// <param name="name">The name.</param>
-        public abstract void CreateSerialCodeProperty(TypeBuilder tb, Type type, string name);
-
-        /// <summary>
-        /// Creates the instance property.
-        /// </summary>
-        /// <param name="tb">The tb.</param>
-        /// <param name="type">The type.</param>
-        /// <param name="name">The name.</param>
-        public abstract void CreateInstanceProperty(TypeBuilder tb, Type type, string name);
 
         /// <summary>
         /// Creates the rubrics property.
@@ -360,6 +532,14 @@ namespace System.Instant
         /// <param name="type">The type.</param>
         /// <param name="name">The name.</param>
         public abstract void CreateRubricsProperty(TypeBuilder tb, Type type, string name);
+
+        /// <summary>
+        /// Creates the serial code property.
+        /// </summary>
+        /// <param name="tb">The tb.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="name">The name.</param>
+        public abstract void CreateSerialCodeProperty(TypeBuilder tb, Type type, string name);
 
         /// <summary>
         /// Creates the set unique key method.
@@ -372,8 +552,12 @@ namespace System.Instant
             ParameterInfo[] args = createArray.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(createArray.Name, createArray.Attributes & ~MethodAttributes.Abstract,
-                                                          createArray.CallingConvention, createArray.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                createArray.Name,
+                createArray.Attributes & (~MethodAttributes.Abstract),
+                createArray.CallingConvention,
+                createArray.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(method, createArray);
 
             ILGenerator il = method.GetILGenerator();
@@ -396,8 +580,12 @@ namespace System.Instant
             ParameterInfo[] args = createArray.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder method = tb.DefineMethod(createArray.Name, createArray.Attributes & ~MethodAttributes.Abstract,
-                                                          createArray.CallingConvention, createArray.ReturnType, argTypes);
+            MethodBuilder method = tb.DefineMethod(
+                createArray.Name,
+                createArray.Attributes & (~MethodAttributes.Abstract),
+                createArray.CallingConvention,
+                createArray.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(method, createArray);
 
             ILGenerator il = method.GetILGenerator();
@@ -415,8 +603,11 @@ namespace System.Instant
         /// <param name="tb">The tb.</param>
         public virtual void CreateUniqueKeyProperty(TypeBuilder tb)
         {
-            PropertyBuilder prop = tb.DefineProperty("UniqueKey", PropertyAttributes.HasDefault,
-                                                     typeof(ulong), new Type[] { typeof(ulong) });
+            PropertyBuilder prop = tb.DefineProperty(
+                "UniqueKey",
+                PropertyAttributes.HasDefault,
+                typeof(ulong),
+                new Type[] { typeof(ulong) });
 
             PropertyInfo iprop = typeof(IUnique).GetProperty("UniqueKey");
 
@@ -425,35 +616,43 @@ namespace System.Instant
             ParameterInfo[] args = accessor.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder getter = tb.DefineMethod(accessor.Name, accessor.Attributes & ~MethodAttributes.Abstract,
-                                                          accessor.CallingConvention, accessor.ReturnType, argTypes);
+            MethodBuilder getter = tb.DefineMethod(
+                accessor.Name,
+                accessor.Attributes & (~MethodAttributes.Abstract),
+                accessor.CallingConvention,
+                accessor.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(getter, accessor);
 
             prop.SetGetMethod(getter);
             ILGenerator il = getter.GetILGenerator();
 
-            il.Emit(OpCodes.Ldarg_0); 
-            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField); 
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField);
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetProperty("UniqueKey").GetGetMethod(), null);
-            il.Emit(OpCodes.Ret); 
+            il.Emit(OpCodes.Ret);
 
             MethodInfo mutator = iprop.GetSetMethod();
 
             args = mutator.GetParameters();
             argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder setter = tb.DefineMethod(mutator.Name, mutator.Attributes & ~MethodAttributes.Abstract,
-                                                          mutator.CallingConvention, mutator.ReturnType, argTypes);
+            MethodBuilder setter = tb.DefineMethod(
+                mutator.Name,
+                mutator.Attributes & (~MethodAttributes.Abstract),
+                mutator.CallingConvention,
+                mutator.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(setter, mutator);
 
             prop.SetSetMethod(setter);
             il = setter.GetILGenerator();
 
-            il.Emit(OpCodes.Ldarg_0); 
-            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField); 
-            il.Emit(OpCodes.Ldarg_1); 
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField);
+            il.Emit(OpCodes.Ldarg_1);
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetProperty("UniqueKey").GetSetMethod(), null);
-            il.Emit(OpCodes.Ret); 
+            il.Emit(OpCodes.Ret);
         }
 
         /// <summary>
@@ -462,9 +661,11 @@ namespace System.Instant
         /// <param name="tb">The tb.</param>
         public virtual void CreateUniqueSeedProperty(TypeBuilder tb)
         {
-
-            PropertyBuilder prop = tb.DefineProperty("UniqueSeed", PropertyAttributes.HasDefault,
-                                                     typeof(ulong), new Type[] { typeof(ulong) });
+            PropertyBuilder prop = tb.DefineProperty(
+                "UniqueSeed",
+                PropertyAttributes.HasDefault,
+                typeof(ulong),
+                new Type[] { typeof(ulong) });
 
             PropertyInfo iprop = typeof(IUnique).GetProperty("UniqueSeed");
 
@@ -473,35 +674,43 @@ namespace System.Instant
             ParameterInfo[] args = accessor.GetParameters();
             Type[] argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder getter = tb.DefineMethod(accessor.Name, accessor.Attributes & ~MethodAttributes.Abstract,
-                                                          accessor.CallingConvention, accessor.ReturnType, argTypes);
+            MethodBuilder getter = tb.DefineMethod(
+                accessor.Name,
+                accessor.Attributes & (~MethodAttributes.Abstract),
+                accessor.CallingConvention,
+                accessor.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(getter, accessor);
 
             prop.SetGetMethod(getter);
             ILGenerator il = getter.GetILGenerator();
 
-            il.Emit(OpCodes.Ldarg_0); 
-            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField); 
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField);
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetProperty("UniqueSeed").GetGetMethod(), null);
-            il.Emit(OpCodes.Ret); 
+            il.Emit(OpCodes.Ret);
 
             MethodInfo mutator = iprop.GetSetMethod();
 
             args = mutator.GetParameters();
             argTypes = Array.ConvertAll(args, a => a.ParameterType);
 
-            MethodBuilder setter = tb.DefineMethod(mutator.Name, mutator.Attributes & ~MethodAttributes.Abstract,
-                                                          mutator.CallingConvention, mutator.ReturnType, argTypes);
+            MethodBuilder setter = tb.DefineMethod(
+                mutator.Name,
+                mutator.Attributes & (~MethodAttributes.Abstract),
+                mutator.CallingConvention,
+                mutator.ReturnType,
+                argTypes);
             tb.DefineMethodOverride(setter, mutator);
 
             prop.SetSetMethod(setter);
             il = setter.GetILGenerator();
 
-            il.Emit(OpCodes.Ldarg_0); 
-            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField); 
-            il.Emit(OpCodes.Ldarg_1); 
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldflda, rubricBuilders[0].Member.FigureField);
+            il.Emit(OpCodes.Ldarg_1);
             il.EmitCall(OpCodes.Call, typeof(Ussn).GetProperty("UniqueSeed").GetSetMethod(), null);
-            il.Emit(OpCodes.Ret); 
+            il.Emit(OpCodes.Ret);
         }
 
         /// <summary>
@@ -525,8 +734,7 @@ namespace System.Instant
         public void ResolveFigureAttributes(FieldBuilder fb, MemberRubric mr)
         {
             MemberInfo mi = mr.RubricInfo;
-            if (!(((IMemberRubric)mi).MemberInfo is FieldBuilder) &&
-                !(((IMemberRubric)mi).MemberInfo is PropertyBuilder))
+            if(!(((IMemberRubric)mi).MemberInfo is FieldBuilder) && !(((IMemberRubric)mi).MemberInfo is PropertyBuilder))
             {
                 resolveFigureKeyAttributes(fb, mi, mr);
 
@@ -549,32 +757,40 @@ namespace System.Instant
         public void ResolveMarshalAsAttributeForArray(FieldBuilder field, MemberRubric member, Type type)
         {
             MemberInfo _member = member.RubricInfo;
-            if (member is MemberRubric && ((MemberRubric)member).FigureField != null)
+            if((member is MemberRubric) && (member.FigureField != null))
             {
-                _member = ((MemberRubric)member).FigureField;
+                _member = member.FigureField;
             }
 
             object[] o = _member.GetCustomAttributes(typeof(MarshalAsAttribute), false);
-            if (o == null || !o.Any())
+            if((o == null) || !o.Any())
             {
                 o = _member.GetCustomAttributes(typeof(FigureAsAttribute), false);
-                if (o != null && o.Any())
+                if((o != null) && o.Any())
                 {
                     FigureAsAttribute faa = (FigureAsAttribute)o.First();
-                    CreateFigureAsAttribute(field, new FigureAsAttribute(UnmanagedType.ByValArray) { SizeConst = (faa.SizeConst < 1) ? 64 : faa.SizeConst });
-                }
-                else
+                    CreateFigureAsAttribute(
+                        field,
+                        new FigureAsAttribute(UnmanagedType.ByValArray)
+                        {
+                            SizeConst = (faa.SizeConst < 1) ? 64 : faa.SizeConst
+                        });
+                } else
                 {
                     int size = 64;
-                    if (member.RubricSize > 0)
+                    if(member.RubricSize > 0)
                         size = member.RubricSize;
                     CreateFigureAsAttribute(field, new FigureAsAttribute(UnmanagedType.ByValArray) { SizeConst = size });
                 }
-            }
-            else
+            } else
             {
                 MarshalAsAttribute maa = (MarshalAsAttribute)o.First();
-                CreateMarshaAslAttribute(field, new MarshalAsAttribute(UnmanagedType.ByValArray) { SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst });
+                CreateMarshaAslAttribute(
+                    field,
+                    new MarshalAsAttribute(UnmanagedType.ByValArray)
+                    {
+                        SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst
+                    });
             }
         }
 
@@ -587,190 +803,41 @@ namespace System.Instant
         public void ResolveMarshalAsAttributeForString(FieldBuilder field, MemberRubric member, Type type)
         {
             MemberInfo _member = member.RubricInfo;
-            if (member is MemberRubric && ((MemberRubric)member).FigureField != null)
+            if((member is MemberRubric) && (member.FigureField != null))
             {
-                _member = ((MemberRubric)member).FigureField;
+                _member = member.FigureField;
             }
 
             object[] o = _member.GetCustomAttributes(typeof(MarshalAsAttribute), false);
-            if (o == null || !o.Any())
+            if((o == null) || !o.Any())
             {
                 o = _member.GetCustomAttributes(typeof(FigureAsAttribute), false);
-                if (o != null && o.Any())
+                if((o != null) && o.Any())
                 {
                     FigureAsAttribute maa = (FigureAsAttribute)o.First();
-                    CreateFigureAsAttribute(field, new FigureAsAttribute(UnmanagedType.ByValTStr) { SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst });
-                }
-                else
+                    CreateFigureAsAttribute(
+                        field,
+                        new FigureAsAttribute(UnmanagedType.ByValTStr)
+                        {
+                            SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst
+                        });
+                } else
                 {
                     int size = 64;
-                    if (member.RubricSize > 0)
+                    if(member.RubricSize > 0)
                         size = member.RubricSize;
                     CreateFigureAsAttribute(field, new FigureAsAttribute(UnmanagedType.ByValTStr) { SizeConst = size });
                 }
-            }
-            else
+            } else
             {
                 MarshalAsAttribute maa = (MarshalAsAttribute)o.First();
-                CreateMarshaAslAttribute(field, new MarshalAsAttribute(UnmanagedType.ByValTStr) { SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst });
+                CreateMarshaAslAttribute(
+                    field,
+                    new MarshalAsAttribute(UnmanagedType.ByValTStr)
+                    {
+                        SizeConst = (maa.SizeConst < 1) ? 64 : maa.SizeConst
+                    });
             }
         }
-
-        /// <summary>
-        /// Resolves the figure display attributes.
-        /// </summary>
-        /// <param name="fb">The fb.</param>
-        /// <param name="mi">The mi.</param>
-        /// <param name="mr">The mr.</param>
-        private void resolveFigureDisplayAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
-        {
-            object[] o = mi.GetCustomAttributes(typeof(FigureDisplayAttribute), false);
-            if (o != null && o.Any())
-            {
-                FigureDisplayAttribute fda = (FigureDisplayAttribute)o.First(); ;
-                mr.DisplayName = fda.Name;
-
-                if (fb != null)
-                    CreateFigureDisplayAttribute(fb, fda);
-            }
-            else if (mr.DisplayName != null)
-            {
-                CreateFigureDisplayAttribute(fb, new FigureDisplayAttribute(mr.DisplayName));
-            }
-        }
-
-        /// <summary>
-        /// Resolves the figure identity attributes.
-        /// </summary>
-        /// <param name="fb">The fb.</param>
-        /// <param name="mi">The mi.</param>
-        /// <param name="mr">The mr.</param>
-        private void resolveFigureIdentityAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
-        {
-            if (!mr.IsKey)
-            {
-                object[] o = mi.GetCustomAttributes(typeof(FigureIdentityAttribute), false);
-                if (o != null && o.Any())
-                {
-                    FigureIdentityAttribute fia = (FigureIdentityAttribute)o.First();
-                    mr.IsIdentity = true;
-                    mr.IsAutoincrement = fia.IsAutoincrement;
-
-                    if (Identities.ContainsKey(fia.Order))
-                        fia.Order = (short)(Identities.LastOrDefault().Key + 1);
-
-                    mr.IdentityOrder = fia.Order;
-                    Identities.Add(mr.IdentityOrder, mr);
-
-                    if (fb != null)
-                        CreateFigureIdentityAttribute(fb, fia);
-                }
-                else if (mr.IsIdentity)
-                {
-                    if (Identities.ContainsKey(mr.IdentityOrder))
-                        mr.IdentityOrder += (short)(Identities.LastOrDefault().Key + 1);
-
-                    Identities.Add(mr.IdentityOrder, mr);
-
-                    if (fb != null)
-                        CreateFigureIdentityAttribute(fb, new FigureIdentityAttribute() { IsAutoincrement = mr.IsAutoincrement, Order = mr.IdentityOrder });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Resolves the figure key attributes.
-        /// </summary>
-        /// <param name="fb">The fb.</param>
-        /// <param name="mi">The mi.</param>
-        /// <param name="mr">The mr.</param>
-        private void resolveFigureKeyAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
-        {
-            object[] o = mi.GetCustomAttributes(typeof(KeyAttribute), false);
-            if (o == null || !o.Any())
-                o = mi.GetCustomAttributes(typeof(FigureKeyAttribute), false);
-            else
-                o[0] = new FigureKeyAttribute();
-
-            if (o != null && o.Any())
-            {
-                FigureKeyAttribute fka = (FigureKeyAttribute)o.First();
-                mr.IsKey = true;
-                mr.IsIdentity = true;
-                mr.IsAutoincrement = fka.IsAutoincrement;
-
-                if (Identities.ContainsKey(fka.Order))
-                    fka.Order = (short)(Identities.LastOrDefault().Key + 1);
-
-                mr.IdentityOrder = fka.Order;
-                Identities.Add(mr.IdentityOrder, mr);
-                mr.Required = true;
-
-                if (fb != null)
-                    CreateFigureKeyAttribute(fb, fka);
-            }
-            else if (mr.IsKey)
-            {
-                mr.IsIdentity = true;
-                mr.Required = true;
-
-                if (Identities.ContainsKey(mr.IdentityOrder))
-                    mr.IdentityOrder += (short)(Identities.LastOrDefault().Key + 1);
-
-                Identities.Add(mr.IdentityOrder, mr);
-
-                if (fb != null)
-                    CreateFigureKeyAttribute(fb, new FigureKeyAttribute() { IsAutoincrement = mr.IsAutoincrement, Order = mr.IdentityOrder });
-            }
-        }
-
-        /// <summary>
-        /// Resolves the figure rquired attributes.
-        /// </summary>
-        /// <param name="fb">The fb.</param>
-        /// <param name="mi">The mi.</param>
-        /// <param name="mr">The mr.</param>
-        private void resolveFigureRquiredAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
-        {
-            object[] o = mi.GetCustomAttributes(typeof(FigureRequiredAttribute), false);
-            if (o != null && o.Any())
-            {
-                mr.Required = true;
-
-                if (fb != null)
-                    CreateFigureRequiredAttribute(fb);
-            }
-            else if (mr.Required)
-            {
-                if (fb != null)
-                    CreateFigureRequiredAttribute(fb);
-            }
-        }
-
-        /// <summary>
-        /// Resolves the figure treatment attributes.
-        /// </summary>
-        /// <param name="fb">The fb.</param>
-        /// <param name="mi">The mi.</param>
-        /// <param name="mr">The mr.</param>
-        private void resolveFigureTreatmentAttributes(FieldBuilder fb, MemberInfo mi, MemberRubric mr)
-        {
-            object[] o = mi.GetCustomAttributes(typeof(FigureTreatmentAttribute), false);
-            if (o != null && o.Any())
-            {
-                FigureTreatmentAttribute fta = (FigureTreatmentAttribute)o.First(); ;
-                mr.AggregateOperand = fta.AggregateOperand;
-                mr.SummaryOperand = fta.SummaryOperand;
-
-                if (fb != null)
-                    CreateFigureTreatmentAttribute(fb, fta);
-            }
-            else if (mr.AggregateOperand != AggregateOperand.None || mr.SummaryOperand != AggregateOperand.None)
-            {
-                CreateFigureTreatmentAttribute(fb, new FigureTreatmentAttribute() { AggregateOperand = mr.AggregateOperand, SummaryOperand = mr.SummaryOperand });
-            }
-        }
-
-        #endregion
     }
 }

@@ -1625,11 +1625,11 @@ namespace System.Uniques
             byte[] s = new byte[8];
             fixed (byte* ps = s)
             {
-                Extractor.StructureToPointer(obj, ps);
-                if (*(int*)ps == 0)
-                    *(ulong*)ps = Unique.New;
+                Extractor.StructureToPointer(obj, ps);         
                 if (seed == 0)
                     return s;
+                if (*(int*)ps == 0)
+                    *(ulong*)ps = Unique.New;
                 return Hasher64.ComputeBytes(ps, 8, seed);
             }
         }
@@ -1646,11 +1646,11 @@ namespace System.Uniques
             fixed (byte* ps = s)
             {
                 Extractor.StructureToPointer(obj, ps);
-                ulong r = *(ulong*)ps;
-                if (r == 0)
-                    *(ulong*)ps = Unique.New;
+                ulong r = *(ulong*)ps;             
                 if (seed == 0)
                     return *(ulong*)ps;
+                if (r == 0)
+                    *(ulong*)ps = Unique.New;
                 return Hasher64.ComputeKey(ps, 8, seed);
             }
         }

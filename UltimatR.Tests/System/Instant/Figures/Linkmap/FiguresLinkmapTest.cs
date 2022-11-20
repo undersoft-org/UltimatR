@@ -22,45 +22,24 @@ namespace System.Instant.Tests
     {
         #region Methods
 
-        //[Fact]
-        //public void FiguresLinkmap_Test()
-        //{
-        //    IFigures figuresA = new Figures<FieldsAndPropertiesModel>("Figures_A_Test", FigureMode.Reference).Combine();
+        [Fact]
+        public void FiguresLinkmap_Test()
+        {
+            ISleeve figureA = new Sleeve(typeof(FieldsAndPropertiesModel)).Combine();
 
-        //    IFigures figuresB = new Figures<FieldsAndPropertiesModel>("Figures_B_Test", FigureMode.Reference).Combine();
+            ISleeve figureB = new Sleeve(typeof(FieldsAndPropertiesModel)).Combine();
 
-        //    figuresA =  FiguresLinkmap_AddFigures_A_Helper_Test(figuresA);
+            IFigures figuresA = new Figures(figureA).Combine();
 
-        //    figuresB =  FiguresLinkmap_AddFigures_B_Helper_Test(figuresB);
+            IFigures figuresB= new Figures(figureB).Combine();
 
-        //    //Link fl = new Link(figuresA, figuresB, figuresA.KeyRubrics);
+            figuresA = FiguresLinkmap_AddFigures_A_Helper_Test(figuresA);
 
-        //    //NodeCatalog nc = Linker.Map;
-        //    //LinkMember olm = fl.Origin;
-        //    //LinkMember tlm = fl.Target;
-        //    //var ocards = figuresA.AsCards().ToArray();
-            //var tcards = figuresB.AsCards().ToArray();
+            figuresB = FiguresLinkmap_AddFigures_B_Helper_Test(figuresB);
 
-
-
-            //for (int i = 0; i < ocards.Length; i++)
-            //{
-            //    var ocard = ocards[i];
-            //    var tcard = tcards[i];
-            //    ulong olinkKey = olm.LinkKey(ocard.Value);
-            //    ulong tlinkKey = tlm.LinkKey(tcard.Value);
-
-                //if (!nc.TryGet(olinkKey, out ICard<IFigure> obranch))
-                //    nc.Add(new BranchDeck(fl, ocard).FirstOrDefault());
-                //else
-                //    obranch.Deck.Put(ocard);
-
-                //if (!nc.TryGet(tlinkKey, out ICard<IFigure> tbranch))
-                //    nc.Add(new BranchDeck(fl, tcard).FirstOrDefault());
-                //else
-                //    tbranch.Deck.Put(tcard);
-           // }
-        //}
+            Link fl = new Link(figureA, figureB);
+                       
+        }
 
         private IFigures FiguresLinkmap_AddFigures_A_Helper_Test(IFigures figures)
         {

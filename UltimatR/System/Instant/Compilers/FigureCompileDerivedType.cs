@@ -70,9 +70,7 @@ namespace System.Instant
 
             CreateGetUniqueBytesMethod(tb);
 
-            CreateGetBytesMethod(tb);
-
-           
+            CreateGetBytesMethod(tb);           
 
             CreateEqualsMethod(tb);
 

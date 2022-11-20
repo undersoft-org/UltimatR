@@ -42,7 +42,7 @@ namespace System.Instant.Linking
         /// </summary>
         /// <param name="origin">The origin.</param>
         /// <param name="target">The target.</param>
-        public Link(Sleeve origin, Sleeve target)
+        public Link(ISleeve origin, ISleeve target)
         {
             LinkPair(origin, target);
         }
@@ -53,10 +53,10 @@ namespace System.Instant.Linking
         /// <param name="target">The target.</param>
         /// <param name="parentKeys">The parent keys.</param>
         /// <param name="childKeys">The child keys.</param>
-        public Link(Sleeve origin, Sleeve target, IRubric parentKeys, IRubric childKeys) : this(origin, target)
+        public Link(ISleeve origin, ISleeve target, IRubrics parentKeys, IRubrics childKeys) : this(origin, target)
         {
-            LinkParentKeys(new MemberRubrics(new MemberRubric[] { (MemberRubric)parentKeys }));
-            LinkChildKeys(new MemberRubrics(new MemberRubric[] { (MemberRubric)childKeys }));
+            LinkParentKeys(parentKeys);
+            LinkChildKeys(childKeys);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Link" /> class.
@@ -65,7 +65,7 @@ namespace System.Instant.Linking
         /// <param name="target">The target.</param>
         /// <param name="parentKeys">The parent keys.</param>
         /// <param name="childKeys">The child keys.</param>
-        public Link(Sleeve origin, Sleeve target, string[] parentKeys, string[] childKeys) : this(origin, target)
+        public Link(ISleeve origin, ISleeve target, string[] parentKeys, string[] childKeys) : this(origin, target)
         {
             LinkParentKeys(parentKeys);
             LinkChildKeys(childKeys );
@@ -77,7 +77,7 @@ namespace System.Instant.Linking
         /// <param name="origin">The origin.</param>
         /// <param name="node">The node.</param>
         /// <param name="target">The target.</param>
-        public Link(Sleeve origin, Sleeve node, Sleeve target)
+        public Link(ISleeve origin, ISleeve node, ISleeve target)
         {
             LinkTrio(origin, node, target);
         }
@@ -91,11 +91,11 @@ namespace System.Instant.Linking
         /// <param name="nodeParentKeys">The node parent keys.</param>
         /// <param name="nodeChildKeys">The node child keys.</param>
         /// <param name="childKeys">The child keys.</param>
-        public Link(Sleeve origin, Sleeve node, Sleeve target, IRubric parentKeys, IRubric nodeParentKeys, IRubric nodeChildKeys, IRubric childKeys) : this(origin, node, target)
+        public Link(ISleeve origin, ISleeve node, ISleeve target, IRubrics parentKeys, IRubrics nodeParentKeys, IRubrics nodeChildKeys, IRubrics childKeys) : this(origin, node, target)
         {
-            LinkParentKeys(new MemberRubrics(new MemberRubric[] { (MemberRubric)parentKeys }));
-            LinkNodeKeys(new MemberRubrics(new MemberRubric[] { (MemberRubric)nodeParentKeys }), new MemberRubrics(new MemberRubric[] { (MemberRubric)nodeChildKeys }));
-            LinkChildKeys(new MemberRubrics(new MemberRubric[] { (MemberRubric)childKeys }));
+            LinkParentKeys(parentKeys);
+            LinkNodeKeys(nodeParentKeys, nodeChildKeys);
+            LinkChildKeys(childKeys);
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Link" /> class.
@@ -107,7 +107,7 @@ namespace System.Instant.Linking
         /// <param name="nodeParentKeys">The node parent keys.</param>
         /// <param name="nodeChildKeys">The node child keys.</param>
         /// <param name="childKeys">The child keys.</param>
-        public Link(Sleeve origin, Sleeve node, Sleeve target, string[] parentKeys, string[] nodeParentKeys, string[] nodeChildKeys, string[] childKeys) : this(origin, node, target)
+        public Link(ISleeve origin, ISleeve node, ISleeve target, string[] parentKeys, string[] nodeParentKeys, string[] nodeChildKeys, string[] childKeys) : this(origin, node, target)
         {
             LinkParentKeys(parentKeys);
             LinkNodeKeys(nodeParentKeys, nodeParentKeys);
@@ -372,7 +372,7 @@ namespace System.Instant.Linking
         /// <param name="parentKeys">The parent keys.</param>
         /// <param name="childKeys">The child keys.</param>
         /// <returns>Link.</returns>
-        public Link SetLink(Sleeve origin, Sleeve target, IRubrics parentKeys, IRubrics childKeys)
+        public Link SetLink(ISleeve origin, ISleeve target, IRubrics parentKeys, IRubrics childKeys)
         {
             LinkPair(origin, target);
             LinkParentKeys(parentKeys);
@@ -388,7 +388,7 @@ namespace System.Instant.Linking
         /// <param name="parentKeynames">The parent keynames.</param>
         /// <param name="childKeynames">The child keynames.</param>
         /// <returns>Link.</returns>
-        public Link SetLink(Sleeve origin, Sleeve target, string[] parentKeynames, string[] childKeynames)
+        public Link SetLink(ISleeve origin, ISleeve target, string[] parentKeynames, string[] childKeynames)
         {
             LinkPair(origin, target);
             LinkParentKeys(parentKeynames);
@@ -402,9 +402,9 @@ namespace System.Instant.Linking
         /// <param name="origin">The origin.</param>
         /// <param name="target">The target.</param>
         /// <returns>Link.</returns>
-        public Link LinkPair(Sleeve origin, Sleeve target)
+        public Link LinkPair(ISleeve origin, ISleeve target)
         {
-            Name = origin.Name + "To" + target.Name;
+            Name = origin.GetType().Name + "To" + target.GetType().Name;
 
             UniqueKey = Name.UniqueKey64();
             UniqueSeed = Name.UniqueKey32();
@@ -422,11 +422,9 @@ namespace System.Instant.Linking
         /// <param name="node">The node.</param>
         /// <param name="target">The target.</param>
         /// <returns>Link.</returns>
-        public Link LinkTrio(Sleeve origin, Sleeve node, Sleeve target)
+        public Link LinkTrio(ISleeve origin, ISleeve node, ISleeve target)
         {
-            Name = origin.Name + "To" + target.Name;
-
-            node.Name = Name;
+            Name = origin.GetType().Name + "To" + target.GetType().Name;
 
             UniqueKey = Name.UniqueKey64();
             UniqueSeed = Name.UniqueKey32();

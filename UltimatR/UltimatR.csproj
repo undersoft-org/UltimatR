@@ -8,6 +8,10 @@
     <Authors>Dariusz Hanc</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>data-random-squares.png</PackageIcon>
+    <RepositoryUrl>https://github.com/undersoft-org/UltimatR</RepositoryUrl>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <Version>2.1.2</Version>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -49,9 +53,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="2.44.0" />
+    <PackageReference Include="Grpc.Core" Version="2.44.0" />
+    <PackageReference Include="Grpc.Core.Api" Version="2.44.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.44.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
     <PackageReference Include="NLog" Version="5.0.5" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.1.0" />
+    <PackageReference Include="Polly" Version="7.0.3" />
+    <PackageReference Include="protobuf-net" Version="3.1.22" />
+    <PackageReference Include="protobuf-net.Core" Version="3.1.22" />
+    <PackageReference Include="protobuf-net.Grpc" Version="1.0.177" />
+    <PackageReference Include="protobuf-net.Grpc.ClientFactory" Version="1.0.177" />
+    <PackageReference Include="protobuf-net.Grpc.Reflection" Version="1.0.177" />
+    <PackageReference Include="protobuf-net.Reflection" Version="3.1.22" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
@@ -62,8 +78,8 @@
 	  <PackageReference Include="FluentValidation" Version="10.3.4" />
 	  <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
 	  <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
-	  <PackageReference Include="MediatR" Version="9.0.0" />
-	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+	  <PackageReference Include="MediatR" Version="10.0.1" />
+	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
 	  <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.13" />
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
@@ -101,6 +117,8 @@
 	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.2" />
 	  <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+	  <PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
+	  <PackageReference Include="System.Threading.Channels" Version="4.7.1" />
   </ItemGroup>
 
 
