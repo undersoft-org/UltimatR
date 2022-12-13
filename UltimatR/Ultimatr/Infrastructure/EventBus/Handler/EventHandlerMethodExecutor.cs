@@ -11,7 +11,7 @@ namespace UltimatR
         EventHandlerMethodExecutorAsync ExecutorAsync { get; }
     }
 
-    public class LocalEventHandlerMethodExecutor<TEvent> : IEventHandlerMethodExecutor
+    public class EventHandlerMethodExecutor<TEvent> : IEventHandlerMethodExecutor
         where TEvent : class
     {
         public EventHandlerMethodExecutorAsync ExecutorAsync => (target, parameter) => (target as IEventHandler<TEvent>).HandleEventAsync(parameter as TEvent);

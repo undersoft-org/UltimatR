@@ -15,7 +15,7 @@ namespace UltimatR
         {
             var endpoint = addDsEntitySets<TContext>();
 
-            routePrefix = assignDsoControllerRoute<TContext>(routePrefix);
+            routePrefix = assignStoreRoutes<TContext>(routePrefix);
 
             mvcBuilder.AddOData((opt) =>
             {
@@ -58,24 +58,24 @@ namespace UltimatR
         private static string AddDsEndpointPrefix(Type contextType, string routePrefix = null)
         {
             var iface = DbRegistry.GetDbStore(contextType);
-            return GetDsoControllerRoute(iface, routePrefix);
+            return GetStoreRoutes(iface, routePrefix);
         }
 
-        private static string GetDsoControllerRoute(Type iface, string routePrefix = null)
+        private static string GetStoreRoutes(Type iface, string routePrefix = null)
         {
             if (iface == typeof(IEntryStore))
-                return (routePrefix != null) ? DsoControllerRoute.EntryStore = routePrefix : DsoControllerRoute.EntryStore;
+                return (routePrefix != null) ? StoreRoutes.EntryStore = routePrefix : StoreRoutes.EntryStore;
             else if (iface == typeof(IEventStore))
-                return (routePrefix != null) ? DsoControllerRoute.EventStore = routePrefix : DsoControllerRoute.EventStore;
+                return (routePrefix != null) ? StoreRoutes.EventStore = routePrefix : StoreRoutes.EventStore;
             else if (iface == typeof(IReportStore))
-                return (routePrefix != null) ? DsoControllerRoute.ReportStore = routePrefix : DsoControllerRoute.ReportStore;
+                return (routePrefix != null) ? StoreRoutes.ReportStore = routePrefix : StoreRoutes.ReportStore;
             else if (iface == typeof(IConfigStore))
-                return (routePrefix != null) ? DsoControllerRoute.ConfigStore = routePrefix : DsoControllerRoute.ConfigStore;
+                return (routePrefix != null) ? StoreRoutes.ConfigStore = routePrefix : StoreRoutes.ConfigStore;
             else
-                return (routePrefix != null) ? DsoControllerRoute.StateStore = routePrefix : DsoControllerRoute.StateStore;
+                return (routePrefix != null) ? StoreRoutes.StateStore = routePrefix : StoreRoutes.StateStore;
         }
 
-        private static string assignDsoControllerRoute<TContext>(string routePrefix = null) where TContext : DbContext
+        private static string assignStoreRoutes<TContext>(string routePrefix = null) where TContext : DbContext
         {
             return AddDsEndpointPrefix(typeof(TContext), routePrefix);
         }

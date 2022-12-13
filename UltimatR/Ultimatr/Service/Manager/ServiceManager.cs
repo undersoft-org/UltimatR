@@ -33,7 +33,7 @@ namespace UltimatR
         {
             registry = new ServiceRegistry(services, this);
 
-            configuration = new ServiceConfiguration(ConfigurationHelper.BuildConfiguration()); 
+            configuration = new ServiceConfiguration(registry); 
 
             AddObject<IServiceManager>(this);             
         }

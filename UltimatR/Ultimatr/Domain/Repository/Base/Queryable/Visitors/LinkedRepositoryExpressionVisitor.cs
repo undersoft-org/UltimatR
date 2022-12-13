@@ -25,7 +25,7 @@ namespace UltimatR
         protected override Expression VisitConstant(ConstantExpression node) =>
              node.Type.BaseType != null && 
              node.Type.BaseType.IsGenericType && 
-             node.Type.BaseType.GetGenericTypeDefinition() == typeof(LinkedRepository<>) ? 
+             node.Type.BaseType.GetGenericTypeDefinition() == typeof(RemoteRepository<>) ? 
              Expression.Constant(newRoot) : node;
 
         #endregion

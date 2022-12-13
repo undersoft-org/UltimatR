@@ -24,7 +24,7 @@ namespace UltimatR
 
         public LinkedRepositoryQueryProvider(DataServiceQuery<TEntity> targetDsSet)
         {
-            this.queryType = typeof(LinkedRepository<>);
+            this.queryType = typeof(RemoteRepository<>);
             query = targetDsSet;
         }
 

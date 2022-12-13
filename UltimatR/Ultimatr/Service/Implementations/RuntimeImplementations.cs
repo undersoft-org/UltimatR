@@ -41,8 +41,8 @@ namespace UltimatR
                             {
                                 /*****************************************************************************************/
                                 service.AddScoped(
-                                    typeof(ILinkedRepository<,>).MakeGenericType(store, entityType),
-                                    typeof(LinkedRepository<,>).MakeGenericType(store, entityType));
+                                    typeof(IRemoteRepository<,>).MakeGenericType(store, entityType),
+                                    typeof(RemoteRepository<,>).MakeGenericType(store, entityType));
 
                                 service.AddScoped(
                                     typeof(IEntityCache<,>).MakeGenericType(store, entityType),
@@ -52,12 +52,12 @@ namespace UltimatR
                                 {
                                     /*********************************************************************************************/
                                     service.AddScoped(
-                                        typeof(IRepositoryLink<,,>).MakeGenericType(store, callerType, entityType),
-                                        typeof(RepositoryLink<,,>).MakeGenericType(store, callerType, entityType));
+                                        typeof(IRemoteLink<,,>).MakeGenericType(store, callerType, entityType),
+                                        typeof(RemoteLink<,,>).MakeGenericType(store, callerType, entityType));
 
                                     service.AddScoped(
                                         typeof(ILinkedObject<,>).MakeGenericType(store, callerType),
-                                        typeof(RepositoryLink<,,>).MakeGenericType(store, callerType, entityType));
+                                        typeof(RemoteLink<,,>).MakeGenericType(store, callerType, entityType));
                                     /*********************************************************************************************/
                                 }
                             }

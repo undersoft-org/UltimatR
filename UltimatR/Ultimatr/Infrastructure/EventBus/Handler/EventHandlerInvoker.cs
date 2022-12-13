@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Series;
 using System.Threading.Tasks;
 
 namespace UltimatR
@@ -7,38 +8,26 @@ namespace UltimatR
 
     public class EventHandlerInvoker : IEventHandlerInvoker
     {
-        private readonly ConcurrentDictionary<string, EventHandlerInvokerCacheItem> _cache;
+        private readonly Catalog<IEventHandlerMethodExecutor> _cache;
 
         public EventHandlerInvoker()
         {
-            _cache = new ConcurrentDictionary<string, EventHandlerInvokerCacheItem>();
+            _cache = new Catalog<IEventHandlerMethodExecutor>();
         }
 
         public async Task InvokeAsync(IEventHandler eventHandler, object eventData, Type eventType)
         {
-            var cacheItem = _cache.GetOrAdd($"{eventHandler.GetType().FullName}-{eventType.FullName}", _ =>
+            var cacheItem = _cache.SureGet($"{eventHandler.GetType().FullName}-{eventType.FullName}", _ =>
             {
-                var item = new EventHandlerInvokerCacheItem();
-
-                if (typeof(IEventHandler<>).MakeGenericType(eventType).IsInstanceOfType(eventHandler))
-                {
-                    item.Local = (IEventHandlerMethodExecutor)Activator.CreateInstance(typeof(LocalEventHandlerMethodExecutor<>).MakeGenericType(eventType));
-                }
-                return item;
+                return (IEventHandlerMethodExecutor)typeof(EventHandlerMethodExecutor<>).MakeGenericType(eventType).New();
             });
 
-            if (cacheItem.Local != null)
+            if (cacheItem.Value != null)
             {
-                await cacheItem.Local.ExecutorAsync(eventHandler, eventData);
+                await cacheItem.Value.ExecutorAsync(eventHandler, eventData);
             }
-
-            if (cacheItem.Distributed != null)
-            {
-                await cacheItem.Distributed.ExecutorAsync(eventHandler, eventData);
-            }
-
-            if (cacheItem.Local == null && cacheItem.Distributed == null)
-            {
+            else
+            { 
                 throw new Exception("The object instance is not an event handler. Object type: " + eventHandler.GetType().AssemblyQualifiedName);
             }
         }

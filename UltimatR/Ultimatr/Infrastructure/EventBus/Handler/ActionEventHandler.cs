@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 
 namespace UltimatR
 {
-    public class ActionEventHandler<TEvent> :
-        IEventHandler<TEvent>
+    public class ActionEventHandler<TEvent> : IEventHandler<TEvent>
     {
         public Func<TEvent, Task> Action { get; }
 

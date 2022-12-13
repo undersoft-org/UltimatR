@@ -15,9 +15,12 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using Microsoft.OpenApi.Models;
+using ProtoBuf.Grpc.Server;
+using ProtoBuf.Grpc.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +40,7 @@ namespace UltimatR
         }
 
         public ServiceSetup(IServiceCollection services, IConfiguration configuration) : this(services)
-        { manager.Configuration = new ServiceConfiguration(configuration); }
+        { manager.Configuration = new ServiceConfiguration(configuration, services);}
 
         void AddDbContextConfiguration(IDataContext context)
         {
@@ -50,13 +53,13 @@ namespace UltimatR
         string AddDsClientPrefix(Type contextType, string routePrefix = null)
         {
             Type iface = DsRegistry.GetDsStore(contextType);
-            return GetDsoControllerRoute(iface, routePrefix);
+            return GetStoreRoutes(iface, routePrefix);
         }
 
         string AddDsEndpointPrefix(Type contextType, string routePrefix = null)
         {
             Type iface = DbRegistry.GetDbStore(contextType);
-            return GetDsoControllerRoute(iface, routePrefix);
+            return GetStoreRoutes(iface, routePrefix);
         }
 
         IRepositoryEndpoint<TContext> AddEntitySets<TContext>() where TContext : DbContext
@@ -119,23 +122,23 @@ namespace UltimatR
             return this;
         }
 
-        string GetDsoControllerRoute(Type iface, string routePrefix = null)
+        string GetStoreRoutes(Type iface, string routePrefix = null)
         {
             if(iface == typeof(IEntryStore))
             {
-                return (routePrefix != null) ? (DsoControllerRoute.EntryStore = routePrefix) : DsoControllerRoute.EntryStore;
+                return (routePrefix != null) ? (StoreRoutes.EntryStore = routePrefix) : StoreRoutes.EntryStore;
             } else if(iface == typeof(IEventStore))
             {
-                return (routePrefix != null) ? (DsoControllerRoute.EventStore = routePrefix) : DsoControllerRoute.EventStore;
+                return (routePrefix != null) ? (StoreRoutes.EventStore = routePrefix) : StoreRoutes.EventStore;
             } else if(iface == typeof(IReportStore))
             {
-                return (routePrefix != null) ? (DsoControllerRoute.ReportStore = routePrefix) : DsoControllerRoute.ReportStore;
+                return (routePrefix != null) ? (StoreRoutes.ReportStore = routePrefix) : StoreRoutes.ReportStore;
             } else if(iface == typeof(IConfigStore))
             {
-                return (routePrefix != null) ? (DsoControllerRoute.ConfigStore = routePrefix) : DsoControllerRoute.ConfigStore;
+                return (routePrefix != null) ? (StoreRoutes.ConfigStore = routePrefix) : StoreRoutes.ConfigStore;
             } else
             {
-                return (routePrefix != null) ? (DsoControllerRoute.StateStore = routePrefix) : DsoControllerRoute.StateStore;
+                return (routePrefix != null) ? (StoreRoutes.StateStore = routePrefix) : StoreRoutes.StateStore;
             }
         }
 
@@ -238,6 +241,13 @@ namespace UltimatR
                         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                     }));
 
+            return this;
+        }
+
+        public IServiceSetup AddProcedureService()
+        {
+            registry.TryAddSingleton(BinderConfiguration.Create(binder: new ProcedureServiceBinder(registry)));
+            registry.AddCodeFirstGrpcReflection();
             return this;
         }
 

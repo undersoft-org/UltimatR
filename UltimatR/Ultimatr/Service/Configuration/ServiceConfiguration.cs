@@ -15,7 +15,9 @@ namespace UltimatR
 
         public static IServiceConfiguration BuildConfiguration(this IConfiguration config, IServiceCollection services)
         {
-            return new ServiceConfiguration(config);
+            var _config = new ServiceConfiguration(config);
+            _config.Services = services;
+            return _config;
         }
     }
 
@@ -39,12 +41,33 @@ namespace UltimatR
             config = ConfigurationHelper.BuildConfiguration();
             this.Services = services;
         }
+        public ServiceConfiguration(IConfiguration config, IServiceCollection services)
+        {
+            this.config = config;
+            this.Services = services;
+        }
+
+        public IServiceConfiguration Configure<TOptions>(string sectionName) where TOptions : class
+        {
+            Services.Configure<TOptions>(config.GetSection(sectionName));
+            return this;
+        }
+        public IServiceConfiguration Configure<TOptions>(string sectionName, Action<BinderOptions> configureOptions) where TOptions : class
+        {
+            Services.Configure<TOptions>(config.GetSection(sectionName), configureOptions);
+            return this;
+        }
+        public IServiceConfiguration Configure<TOptions>(Action<TOptions> configureOptions) where TOptions : class
+        {
+            Services.Configure<TOptions>(configureOptions);
+            return this;
+        }
 
         public string Version     => config["Version"];
         public string Title       => config["Title"];
         public string Description => config["Description"];
 
-        public string DsoControllerRoute(string name)
+        public string DataServiceRoutes(string name)
         {
             return config.GetSection("StoreRoutes")[name];
         }

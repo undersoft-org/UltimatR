@@ -12,11 +12,11 @@ namespace UltimatR
         Task AddClientPools();
         Task AddEndpointPools();
         
-        ILinkedRepository<TEntity> load<TEntity>() where TEntity : Entity;
-        ILinkedRepository<TEntity> Load<TEntity>() where TEntity : Entity;
-        ILinkedRepository<TEntity> Load<TEntity>(Type contextType) where TEntity : Entity;
-        ILinkedRepository<TEntity> load<TStore, TEntity>() where TStore : IDataStore where TEntity : Entity;
-        ILinkedRepository<TEntity> Load<TStore, TEntity>() where TStore : IDataStore where TEntity : Entity;
+        IRemoteRepository<TEntity> load<TEntity>() where TEntity : Entity;
+        IRemoteRepository<TEntity> Load<TEntity>() where TEntity : Entity;
+        IRemoteRepository<TEntity> Load<TEntity>(Type contextType) where TEntity : Entity;
+        IRemoteRepository<TEntity> load<TStore, TEntity>() where TStore : IDataStore where TEntity : Entity;
+        IRemoteRepository<TEntity> Load<TStore, TEntity>() where TStore : IDataStore where TEntity : Entity;
         
         IRepositoryClient GetClient<TStore, TEntity>() where TEntity : Entity;
         IEnumerable<IRepositoryClient> GetClients();

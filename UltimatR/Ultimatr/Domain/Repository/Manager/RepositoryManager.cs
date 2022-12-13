@@ -63,30 +63,30 @@ namespace UltimatR
             return Services.GetService<IDataRepository<TStore, TEntity>>();
         }
 
-        public ILinkedRepository<TEntity> load<TStore, TEntity>() where TEntity : Entity where TStore : IDataStore
+        public IRemoteRepository<TEntity> load<TStore, TEntity>() where TEntity : Entity where TStore : IDataStore
         {
             return Load<TStore, TEntity>();
         }
-        public ILinkedRepository<TEntity> load<TEntity>() where TEntity : Entity
+        public IRemoteRepository<TEntity> load<TEntity>() where TEntity : Entity
         {
             return Load<TEntity>();
         }
 
-        public ILinkedRepository<TEntity> Load<TEntity>() where TEntity : Entity
+        public IRemoteRepository<TEntity> Load<TEntity>() where TEntity : Entity
         {
             return Load<TEntity>(DsRegistry.GetContexts<TEntity>().FirstOrDefault());
         }
-        public ILinkedRepository<TEntity> Load<TEntity>(Type contextType)
+        public IRemoteRepository<TEntity> Load<TEntity>(Type contextType)
            where TEntity : Entity
         {
-            return (ILinkedRepository<TEntity>)Services.GetService(typeof(ILinkedRepository<,>)
+            return (IRemoteRepository<TEntity>)Services.GetService(typeof(IRemoteRepository<,>)
                                                      .MakeGenericType(DsRegistry
                                                      .Stores[contextType],
                                                       typeof(TEntity)));
         }
-        public ILinkedRepository<TEntity> Load<TStore, TEntity>() where TEntity : Entity where TStore : IDataStore
+        public IRemoteRepository<TEntity> Load<TStore, TEntity>() where TEntity : Entity where TStore : IDataStore
         {
-            var result= Services.GetService<ILinkedRepository<TStore, TEntity>>();
+            var result= Services.GetService<IRemoteRepository<TStore, TEntity>>();
             return result;
         }
 

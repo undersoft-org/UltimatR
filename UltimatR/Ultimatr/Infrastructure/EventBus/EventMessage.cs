@@ -2,7 +2,7 @@
 
 namespace UltimatR
 {
-    public class EventMessage
+    public class EventMessage : Event
     {
         public Guid MessageId { get; }
 

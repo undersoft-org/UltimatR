@@ -327,6 +327,7 @@ namespace UltimatR
 
         public virtual Task<int> Save(bool asTransaction, CancellationToken token = default(CancellationToken))
         { return Context.Save(asTransaction, token); }
+        
         public object ServiceEntitySet<TEntity>() where TEntity : class, IIdentifiable
         { return Context.ServiceEntitySet<TEntity>(); }
         public object ServiceEntitySet(Type entityType) { return Context.ServiceEntitySet(entityType); }

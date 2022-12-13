@@ -7,7 +7,7 @@ namespace UltimatR
     public interface IServiceConfiguration : IConfiguration
     {
         string Version { get; }
-
+        IServiceConfiguration Configure<TOptions>(string sectionName) where TOptions : class;
         IConfigurationSection Client(string name);
         IConfigurationSection DataCacheLifeTime();
         int ClientPoolSize(IConfigurationSection endpoint);
@@ -17,7 +17,7 @@ namespace UltimatR
         ClientProvider ClientProvider(string name);
         IEnumerable<IConfigurationSection> Clients();
         string Description { get; }
-        string DsoControllerRoute(string name);
+        string DataServiceRoutes(string name);
         IConfigurationSection Endpoint(string name);
         int EndpointPoolSize(IConfigurationSection endpoint);
         string EndpointConnectionString(IConfigurationSection endpoint);

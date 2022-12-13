@@ -26,7 +26,7 @@ namespace UltimatR
             IServiceRegistry service = registry;
 
             assemblies ??= AppDomain.CurrentDomain.GetAssemblies();
-            service.AddValidatorsFromAssemblies(assemblies);
+            service.AddValidatorsFromAssemblies(assemblies, ServiceLifetime.Singleton, null, true );
             service.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
             service.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             service.AddMediatR(assemblies);
@@ -100,7 +100,7 @@ namespace UltimatR
                                     typeof(IRequestHandler<,>).MakeGenericType(
                                         new[]
                                     {
-                                        typeof(RenewDto<,,>).MakeGenericType(store, entityType, dto),
+                                        typeof(UpsertDto<,,>).MakeGenericType(store, entityType, dto),
                                         typeof(DtoCommand<>).MakeGenericType(dto)
                                     }),
                                     typeof(RenewDtoHandler<,,>).MakeGenericType(store, entityType, dto));
@@ -218,7 +218,7 @@ namespace UltimatR
 
                                 service.AddTransient(
                                     typeof(INotificationHandler<>).MakeGenericType(
-                                        typeof(RenewedDto<,,>).MakeGenericType(store, entityType, dto)),
+                                        typeof(UpsertedDto<,,>).MakeGenericType(store, entityType, dto)),
                                     typeof(UpsertedDtoHandler<,,>).MakeGenericType(store, entityType, dto));
 
                                 service.AddTransient(
